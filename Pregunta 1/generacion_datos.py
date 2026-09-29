@@ -1,61 +1,82 @@
+from pathlib import Path
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 # ----------- Datos solicitados ---------- #
 T_imagen    =   256
 L_cuadrado  =   128
 R_circulo   =   32
 I_fondo, I_cuadrado, I_circulo = 0.15, 0.45, 0.80
-
-N       =   40                          # N en y = Poisson(N*x)/N
-SEED    =   1234                    
-
 # ---------------------------------------- #
 
-def imagen_sola(size=T_imagen):
 
-    x = np.full((size, size), I_fondo, dtype=np.float64)
+def imagen_ideal(tam=256, i_fondo=0.15, i_cuadrado=0.45, i_circulo=0.80,
+                       l_cuadrado=128, r_circulo=32):
+
+    imagen = np.full((tam, tam), i_fondo, dtype=np.float32)
 
     # Cuadrado centrado 
-    ini = (size - L_cuadrado) // 2       #   inicio  = mitad imagen - medio lado 
-    fin = ini + L_cuadrado                #   fin     = inicio + lado
-    square = np.zeros((size, size), dtype=bool)
-    square[ini:fin, ini:fin] = True
+    ini = (tam - l_cuadrado) // 2       #   inicio  = mitad imagen - medio lado
+    fin = ini + l_cuadrado              #   fin     = inicio + lado
+    cuadrado = np.zeros((tam, tam), dtype=bool)
+    cuadrado[ini:fin, ini:fin] = True
 
     # Ya que T_imagen es par, el centro real esta entre los pixeles 127 y 128 -> (size-1)/2 = 127.5,
-    c = (size - 1) / 2
-    i, j = np.indices((size, size))
-    circle = (i - c) ** 2 + (j - c) ** 2 <= R_circulo ** 2
+    c = (tam - 1) / 2
+    i, j = np.indices((tam, tam))
+    circulo = (i - c) ** 2 + (j - c) ** 2 <= r_circulo ** 2
 
-    x[square] = I_cuadrado
-    x[circle] = I_circulo
+    imagen[cuadrado] = i_cuadrado
+    imagen[circulo] = i_circulo
 
-    masks = {
-        "fondo": ~square,
-        "cuadrado": square & ~circle,   # cuadrado excluyendo el circulo
-        "circulo": circle,
+    mascaras = {
+        'Fondo':    ~cuadrado,
+        'Cuadrado': cuadrado & ~circulo,   # cuadrado excluyendo el círculo
+        'Circulo':  circulo,
     }
-    return x, masks
 
-def añadir_ruido(x, N=N, seed=SEED):
-    rng = np.random.default_rng(seed)
-    return rng.poisson(N * x).astype(np.float64) / N
+    return imagen, mascaras
+
+def agregar_poisson(imagen, N):
+    imagen_ruidosa = np.random.poisson(imagen * N) / N
+    return imagen_ruidosa.astype(np.float32)
 
 
- 
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    from pathlib import Path
+def rmse(a, b, mascara=None): #obtenido de las capsulas 
+    d = (a.astype(np.float64) - b.astype(np.float64))
+    if mascara is not None:
+        d = d[mascara]
+    return float(np.sqrt(np.mean(d**2)))
 
-    # 1. Configuración inicial y generación de datos
-    N = 40  # Asegúrate de definir N si no está como variable global
-    x, masks = imagen_sola()
-    y = añadir_ruido(x)
 
-    # 2. Configuración del directorio de salida
+
+if __name__ == '__main__':
+    
+    SEED = 1234
+    np.random.seed(SEED)    # semilla fija
+
+    N = 40             
+    x, masks = imagen_ideal()
+    y = agregar_poisson(x, N)
+
+
+   # directorio de salida
     output_dir = Path(__file__).resolve().parent / "figures_p1"
     output_dir.mkdir(exist_ok=True)
 
-    # 3. Gráfico 1: Imagen Ideal vs Ruidosa
+    
+    # Estadísticas por región
+    valores = {'Fondo': 0.15, 'Cuadrado': 0.45, 'Circulo': 0.80}
+    print(f'N={N}, semilla={SEED}')
+    print(f"{'Región':10s} {'#píxeles':>9s} {'x':>5s} {'media(y)':>9s} {'RMSE':>8s} {'sqrt(x/N)':>10s}")
+    for nombre, m in masks.items():
+        print(f'{nombre:10s} {m.sum():9d} {valores[nombre]:5.2f} {y[m].mean():9.4f} '
+              f'{rmse(y, x, m):8.4f} {np.sqrt(valores[nombre]/N):10.4f}')
+    print(f'RMSE global (sin filtrar): {rmse(y, x):.4f}')
+
+
+    # Gráfico 1: Imagen Ideal vs Ruidosa
     fig, ax = plt.subplots(1, 2, figsize=(12, 5))
 
     ax[0].imshow(x, cmap="gray", vmin=0, vmax=1)
@@ -68,7 +89,7 @@ if __name__ == "__main__":
 
     fig.tight_layout()
 
-    # 4. Gráfico 2: Máscaras de las regiones
+    # Gráfico 2: Máscaras de las regiones
     fig_masks, ax_masks = plt.subplots(1, 3, figsize=(12, 4))
     nombres_mascaras = ["fondo", "cuadrado", "circulo"]
 
@@ -84,3 +105,7 @@ if __name__ == "__main__":
     fig_masks.savefig(output_dir / "1.1_mascaras.png", dpi=200, bbox_inches="tight")
     
     plt.show()
+
+
+
+
