@@ -42,7 +42,6 @@ def agregar_poisson(imagen, N):
     imagen_ruidosa = np.random.poisson(imagen * N) / N
     return imagen_ruidosa.astype(np.float32)
 
-
 def rmse(a, b, mascara=None): #obtenido de las capsulas 
     d = (a.astype(np.float64) - b.astype(np.float64))
     if mascara is not None:
