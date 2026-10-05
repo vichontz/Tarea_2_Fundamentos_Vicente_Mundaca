@@ -31,19 +31,21 @@ def filtrar_gaussiano(imagen, sigma, K=4.0):
 
 
 
-import numpy as np
+MU_CONTROL = np.array([0.15, 0.45, 0.80])
+SIGMA_CONTROL = np.array([1.72, 1.31, 1.62])
+
+
+def sigma_por_intensidad(intensidad):
+    return np.interp(intensidad, MU_CONTROL, SIGMA_CONTROL)
+
 
 def mapa_sigma(y_ruidosa, sigma_aux=2.0):
 
     #estimamos la intesidad con un filtro gaussiano con sigma_aux (lo demas es como la T1)
     mu_hat = filtrar_gaussiano(y_ruidosa, sigma=sigma_aux)
 
-    #Puntos de control 
-    mu_control = [0.15, 0.45, 0.80]
-    sigma_control = [1.72, 1.31, 1.62]
-
-    # saturamos en 0.15 y 0.80.
-    mapa_sigma = np.interp(mu_hat, mu_control, sigma_control)
+    # np.interp mantiene el sigma del extremo fuera del rango de control.
+    mapa_sigma = sigma_por_intensidad(mu_hat)
     return mapa_sigma, mu_hat
 
 
@@ -55,5 +57,26 @@ def filtrar_adaptativo(y_ruidosa, mapa_sigma, K=4.0):
     # Encontramos los maximos de la imagen para hacer padding
     sigma_max = np.max(mapa_sigma)
     radio_max = radio_kernel(sigma_max, K)
+    
+    # Reflejamos en bordes para no perder info
+    y_padded = np.pad(y_ruidosa, pad_width=radio_max, mode='reflect')
 
-    return
+    for i in range(filas):
+        for j in range(columnas):
+
+            # Obtenemos el sigma para cada pixel
+            sigma_actual = mapa_sigma[i, j]
+
+            # construimos su kernel y radio
+            kernel = gaussian_kernel(sigma_actual, K)
+            r = radio_kernel(sigma_actual, K)
+
+            # (hay que desplazar por radio_max debido al padding)
+            centro_i = i + radio_max
+            centro_j = j + radio_max
+            ventana = y_padded[centro_i - r : centro_i + r + 1, 
+                               centro_j - r : centro_j + r + 1]
+            # Mulplicamos y sumamos para obtener el filtrado
+            imagen_filtrada[i, j] = np.sum(ventana * kernel)
+
+    return imagen_filtrada
