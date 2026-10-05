@@ -77,3 +77,6 @@ if __name__ == "__main__":
     print("Valores óptimos encontrados:")
     for region, datos in minimos.items():
         print(f"  {region.capitalize():>8s}: sigma = {datos['sigma']:.2f} | RMSE = {datos['rmse']:.4f}")
+
+
+    

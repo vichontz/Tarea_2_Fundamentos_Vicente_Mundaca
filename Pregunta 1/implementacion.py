@@ -30,3 +30,30 @@ def filtrar_gaussiano(imagen, sigma, K=4.0):
     return convolve(imagen, kernel, mode='reflect')
 
 
+
+import numpy as np
+
+def mapa_sigma(y_ruidosa, sigma_aux=2.0):
+
+    #estimamos la intesidad con un filtro gaussiano con sigma_aux (lo demas es como la T1)
+    mu_hat = filtrar_gaussiano(y_ruidosa, sigma=sigma_aux)
+
+    #Puntos de control 
+    mu_control = [0.15, 0.45, 0.80]
+    sigma_control = [1.72, 1.31, 1.62]
+
+    # saturamos en 0.15 y 0.80.
+    mapa_sigma = np.interp(mu_hat, mu_control, sigma_control)
+    return mapa_sigma, mu_hat
+
+
+def filtrar_adaptativo(y_ruidosa, mapa_sigma, K=4.0):
+
+    filas, columnas = y_ruidosa.shape
+    imagen_filtrada = np.zeros_like(y_ruidosa)
+
+    # Encontramos los maximos de la imagen para hacer padding
+    sigma_max = np.max(mapa_sigma)
+    radio_max = radio_kernel(sigma_max, K)
+
+    return
