@@ -37,3 +37,45 @@ def cargar_imagen(ruta=None):
 def sl(r):
     return (slice(r[0], r[1]), slice(r[2], r[3]))
 
+r_cordillera = sl([1230, 1480, 550, 1070])
+
+if __name__ == '__main__':
+
+    os.makedirs('Pregunta 2/figures_p2', exist_ok=True)
+    #x = cargar_imagen('Pregunta 2/imagen2.png') # Taza
+    #x = cargar_imagen()                         # Cámara (skimage)
+    x = cargar_imagen('Pregunta 2/imagen2.png') # Cordillera
+    y = agregar_ruido_gaussiano(x)
+    gx_, gy_ = grad_mag(x), grad_mag(y)
+    res = {}
+
+    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
+
+    ax[0].imshow(x, cmap="gray", vmin=0, vmax=1)
+    ax[0].set_title("Imagen ideal ")
+    ax[0].axis("off")
+    
+
+    ax[1].imshow(y, cmap="gray", vmin=0, vmax=1)
+    ax[1].set_title("Ruidosa")
+    ax[1].axis("off")
+    
+
+    fig_slice, ax_slice = plt.subplots(1, 2, figsize=(12, 5))
+    ax_slice[0].imshow(x[r_cordillera], cmap="gray", vmin=0, vmax=1)
+    ax_slice[0].set_title("Recorte: imagen ideal")
+    ax_slice[0].axis("off")
+
+    ax_slice[1].imshow(y[r_cordillera], cmap="gray", vmin=0, vmax=1)
+    ax_slice[1].set_title("Recorte: imagen ruidosa")
+    ax_slice[1].axis("off")
+
+    fig.tight_layout()
+    fig_slice.tight_layout()
+    fig_slice.savefig(os.path.join("Pregunta 2/figures_p2", "comparacion_recorte.png"),
+                      dpi=200, bbox_inches="tight")
+    
+    plt.show()
+
+
+    
