@@ -62,11 +62,7 @@ Tarea_2_Fundamentos_Vicente_Mundaca/
 
 ## Instrucciones de ejecución
 
-Ejecuta todos los scripts desde la raíz del repositorio, por ejemplo:
-
-```bash
-cd "C:\Users\vicen\OneDrive - Universidad Católica de Chile\UNI\6to semestre\Imagenes\area 2\Tarea_2_Fundamentos_Vicente_Mundaca"
-```
+Ejecuta todos los scripts desde la raíz del repositorio
 
 ### Pregunta 1: filtro Gaussiano adaptativo
 
