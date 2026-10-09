@@ -96,4 +96,18 @@ def difusion_anisotropica(u0, coef, lam, n_iter, referencia=None, guardar=()):
         if t in guardar:
             info['snap'][t] = u.copy()
     return u, info
- 
+
+ #los 2 coeficientes pedidos:
+
+ # 1) coeficiente con exponente 4, difunde mas en las zonas planas y menos en los bordes, es mas agresivo que el coeficiente con exponente 2 
+def coef_v1(k):
+    if k <= 0:
+        raise ValueError("k debe ser > 0")
+    
+    def c(u):
+        # h(E) = exp(-(E/k)^4) donde E = |grad u|
+        return np.exp(-(grad_mag(u) / k) ** 4)
+        
+    c.cmax = 1.0  # max cuando gradiente = 0 (e^0 = 1)
+    c.nombre = f"V1_exp4(k={k:g})"
+    return c
