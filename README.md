@@ -1,4 +1,4 @@
-﻿# Tarea 2: IEE2714 - Fundamentos de Procesamiento de Imágenes
+ Tarea 2: IEE2714 - Fundamentos de Procesamiento de Imágenes
 
 **Autor:** Vicente Agustín Mundaca Candia
 
@@ -21,13 +21,6 @@ Si no están instalados, se pueden instalar con:
 python -m pip install numpy scipy matplotlib scikit-image
 ```
 
-Opcionalmente, puede crear un entorno virtual para trabajar en un contexto aislado:
-
-```bash
-python -m venv .venv
-# En Windows PowerShell
-.\.venv\Scripts\Activate.ps1
-```
 
 ---
 
@@ -63,7 +56,7 @@ Tarea_2_Fundamentos_Vicente_Mundaca/
 └── figures/
 ```
 
-> Si `Pregunta 2/imagen2.png` no existe, el script usa de respaldo la imagen `camera` de `skimage.data`.
+> Si `Pregunta 2/imagen2.png` no existe, el script usa la imagen `camera` de `skimage.data`.
 
 ---
 
@@ -139,4 +132,9 @@ Con esto se regeneran las figuras principales y los análisis comparativos del t
 
 ## Observación
 
-Los scripts están construidos para ejecutarse desde la raíz del repositorio y no requieren argumentos adicionales. Si se ejecutan en un entorno virtual, se recomienda activar la sesión antes de correr cualquiera de los comandos anteriores.
+Para la pregunta 1 en experimentacion se pueden descomentar 4 semillas, las cuales fueron utilizadas para verificar que los resultados fueran generalizables para toda semilla.
+
+
+Para la pregunta 2/experimentación.py en caso de querer aplicar el proceso a la imagen de cordillera descomentar la linea 21 y comentar la linea 22 y descomentar la linea 55 y comentar la 54.
+
+para las experimentaciones 2 3 y 4 si se quiere cambiar la imagen nuevamente hay que comentar y descomentar las lineas donde se define x.
