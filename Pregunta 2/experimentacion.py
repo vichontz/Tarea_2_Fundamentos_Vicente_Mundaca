@@ -17,11 +17,13 @@ from implementacion import (agregar_ruido_gaussiano, rmse, grad_mag,
 EPSILONS = [0.005, 0.05, 0.1, 0.5, 1.0]
 FACTOR_LAM = 0.5          # lam = FACTOR_LAM * 1/(4*cmax)
 N_MAX = 300
-ROIS = {                  # (fila0, fila1, col0, col1) en la imagen cordillera
-    'Borde':      (1230,1430, 550, 750),
-    'Plana':      (830, 1030, 330, 530),
-    'Textura':    (1180, 1380, 1300, 1500),
-} 
+
+#ROIS = {'Borde': (1230,1430, 550, 750), 'Plana': (830, 1030, 330, 530),'Textura': (1180, 1380, 1300, 1500),} 
+ROIS = {                  # (fila0, fila1, col0, col1) en la imagen 'camera' 512x512
+    'Plana'     :      (10, 74, 10, 74),
+    'Borde'     :      (100, 164, 51, 115),
+    'Textura'   :    (80, 144, 180, 244),
+}
 ruta = "Pregunta 2/figures_p2"
 def cargar_imagen(ruta=None):
     if ruta is None:
@@ -41,16 +43,16 @@ def cargar_imagen(ruta=None):
 def sl(r):
     return (slice(r[0], r[1]), slice(r[2], r[3]))
 
-r_cordillera = sl([1230, 1480, 550, 1070])
-
+#r_corte = sl([1230, 1480, 550, 1070])
+r_corte = sl ( [60, 124, 190, 254] ) # Borde
 
 
 if __name__ == '__main__':
 
     os.makedirs(ruta, exist_ok=True)
-    #x = cargar_imagen('Pregunta 2/imagen2.png') # Taza
-    #x = cargar_imagen()                         # Cámara (skimage)
-    x = cargar_imagen('Pregunta 2/imagen2.png') # Cordillera
+    #x = cargar_imagen('Pregunta 2/imagen1.png') # Taza
+    x = cargar_imagen()                         # Cámara (skimage)
+    #x = cargar_imagen('Pregunta 2/imagen2.png') # Cordillera
     y = agregar_ruido_gaussiano(x)
     gx_, gy_ = grad_mag(x), grad_mag(y)
     res = {}
@@ -68,11 +70,11 @@ if __name__ == '__main__':
     
 
     fig_slice, ax_slice = plt.subplots(1, 2, figsize=(12, 5))
-    ax_slice[0].imshow(x[r_cordillera], cmap="gray", vmin=0, vmax=1)
+    ax_slice[0].imshow(x[r_corte], cmap="gray", vmin=0, vmax=1)
     ax_slice[0].set_title("Recorte: imagen ideal")
     ax_slice[0].axis("off")
 
-    ax_slice[1].imshow(y[r_cordillera], cmap="gray", vmin=0, vmax=1)
+    ax_slice[1].imshow(y[r_corte], cmap="gray", vmin=0, vmax=1)
     ax_slice[1].set_title("Recorte: imagen ruidosa")
     ax_slice[1].axis("off")
 
@@ -121,7 +123,7 @@ if __name__ == '__main__':
     for eps in EPSILONS:
         u = res[eps]['u']
         print(f'{eps:7g}' + ''.join(f'{rmse(x[sl(r)], u[sl(r)]):22.4f}' for r in ROIS.values()))
-    print('\nRetención: textura = std(u)/std(x) en pasto; borde = p99|grad u| / p99|grad x| en cabeza')
+    print('\nRetención: textura = std(u)/std(x); borde = p99|grad u| / p99|grad x|')
     rt, rb = ROIS['Textura'], ROIS['Borde']
     print(f'  referencia ruidosa: textura {y[sl(rt)].std()/x[sl(rt)].std():.3f}  borde {np.percentile(gy_[sl(rb)],99)/np.percentile(gx_[sl(rb)],99):.3f}')
     for eps in EPSILONS:
