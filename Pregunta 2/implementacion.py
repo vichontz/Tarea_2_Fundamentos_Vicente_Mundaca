@@ -1,5 +1,6 @@
 
 import numpy as np
+from scipy.ndimage import gaussian_filter
 
 SEMILLA = 7
 SIGMA_RUIDO = 0.05
@@ -109,5 +110,25 @@ def coef_v1(k):
         return np.exp(-(grad_mag(u) / k) ** 4)
         
     c.cmax = 1.0  # max cuando gradiente = 0 (e^0 = 1)
-    c.nombre = f"V1_exp4(k={k:g})"
+    c.nombre = f"v1(k={k:g})"
+    return c
+
+
+ # 2) coeficiente con filtro Gaussiano para calcular el indicador E (mucho menos sensible al ruido)
+def coef_v2(k, sigma=1.0):
+    if k <= 0:
+        raise ValueError("k debe ser > 0")
+        
+    def c(u):
+        # Filtramos la imagen antes de sacar la segunda derivada
+        u_suave = gaussian_filter(u, sigma=sigma)
+        
+        # Calculamos la magnitud del Laplaciano
+        lap = np.abs(laplaciano(u_suave))
+        
+        # Función racional h(E) = 1 / (1 + (E/k)^2)
+        return 1.0 / (1.0 + (lap / k) ** 2)
+        
+    c.cmax = 1.0  # max cuando laplaciano = 0,  1/1 = 1
+    c.nombre = f"v2(k={k:g}, sig={sigma:g})"
     return c
