@@ -17,7 +17,11 @@ from implementacion import (agregar_ruido_gaussiano, rmse, grad_mag,
 EPSILONS = [0.003, 0.01, 0.03, 0.1, 0.3, 1.0]
 FACTOR_LAM = 0.5          # lam = FACTOR_LAM * 1/(4*cmax)
 N_MAX = 300
-ROIS = {}
+ROIS = {                  # (fila0, fila1, col0, col1) en la imagen cordillera
+    'Borde':      (1230,1430, 550, 750),
+    'Plana':      (830, 1030, 330, 530),
+    'Textura':    (1180, 1380, 1300, 1500),
+} 
 
 def cargar_imagen(ruta=None):
     if ruta is None:
@@ -34,10 +38,12 @@ def cargar_imagen(ruta=None):
     else:
         return img
 
-def sl(r):
+def sr(r):
     return (slice(r[0], r[1]), slice(r[2], r[3]))
 
-r_cordillera = sl([1230, 1480, 550, 1070])
+r_cordillera = sr([1230, 1480, 550, 1070])
+
+
 
 if __name__ == '__main__':
 
@@ -70,11 +76,24 @@ if __name__ == '__main__':
     ax_slice[1].set_title("Recorte: imagen ruidosa")
     ax_slice[1].axis("off")
 
+    fig_rois, ax_rois = plt.subplots(1, len(ROIS), figsize=(15, 5))
+    for axis, (nombre, region) in zip(ax_rois, ROIS.items()):
+        ideal_roi = x[sr(region)]
+        ruidosa_roi = y[sr(region)]
+        comparacion = np.concatenate((ideal_roi, ruidosa_roi), axis=1)
+
+        axis.imshow(comparacion, cmap="gray", vmin=0, vmax=1)
+        axis.axvline(ideal_roi.shape[1] - 0.5, color="red", linewidth=1.5)
+        axis.set_title(f"{nombre}\nIdeal | Ruidosa")
+        axis.axis("off")
+
     fig.tight_layout()
     fig_slice.tight_layout()
+    fig_rois.tight_layout()
     fig_slice.savefig(os.path.join("Pregunta 2/figures_p2", "comparacion_recorte.png"),
                       dpi=200, bbox_inches="tight")
-    
+    fig_rois.savefig(os.path.join("Pregunta 2/figures_p2", "comparacion_rois.png"),
+                     dpi=200, bbox_inches="tight")
     plt.show()
 
 
