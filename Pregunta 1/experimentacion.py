@@ -27,8 +27,8 @@ if __name__ == "__main__":
     #para guardar imagenes
     output_dir = Path(__file__).resolve().parent / "figures_p1"
 
-    print("indique que experimento desea ejcutar: \n 1. Barrido de sigma \n 2. Filtrado adaptativo \n 3. Barrido de sigma_aux")
-    opcion = input("Ingrese su elección (1, 2 o 3): ")
+    print("indique que experimento desea ejcutar: \n 1. Barrido de sigma \n 2. Filtrado adaptativo")
+    opcion = input("Ingrese su elección (1 o 2): ")
 
 
     if int(opcion) == 1:
